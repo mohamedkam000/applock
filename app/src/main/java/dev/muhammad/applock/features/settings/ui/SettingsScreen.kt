@@ -71,15 +71,12 @@ import dev.muhammad.applock.core.utils.openAccessibilitySettings
 import dev.muhammad.applock.data.repository.AppLockRepository
 import dev.muhammad.applock.data.repository.BackendImplementation
 import dev.muhammad.applock.services.ExperimentalAppLockService
-import dev.muhammad.applock.services.ShizukuAppLockService
 import dev.muhammad.applock.ui.icons.Accessibility
 import dev.muhammad.applock.ui.icons.BrightnessHigh
 import dev.muhammad.applock.ui.icons.Fingerprint
 import dev.muhammad.applock.ui.icons.FingerprintOff
 import dev.muhammad.applock.ui.icons.Github
 import dev.muhammad.applock.ui.icons.Timer
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuProvider
 import kotlin.math.abs
 
 
@@ -92,19 +89,6 @@ fun SettingsScreen(
     val appLockRepository = remember { AppLockRepository(context) }
     var showDialog by remember { mutableStateOf(false) }
     var showUnlockTimeDialog by remember { mutableStateOf(false) }
-
-    val shizukuPermissionLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                Toast.makeText(context, "Shizuku granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(
-                    context,
-                    "Shizuku is required for advanced features.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
 
     var useMaxBrightness by remember {
         mutableStateOf(appLockRepository.shouldUseMaxBrightness())
@@ -121,9 +105,6 @@ fun SettingsScreen(
 
     var antiUninstallEnabled by remember {
         mutableStateOf(appLockRepository.isAntiUninstallEnabled())
-    }
-    var shizukuExperimental by remember {
-        mutableStateOf(appLockRepository.isShizukuExperimentalEnabled())
     }
     var disableHapticFeedback by remember {
         mutableStateOf(appLockRepository.shouldDisableHaptics())
@@ -253,17 +234,6 @@ fun SettingsScreen(
                                 appLockRepository.setPromptForBiometricAuth(isChecked)
                             }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                        SettingItem(
-                            icon = Icons.Default.Vibration,
-                            title = "Disable haptic feedback",
-                            description = "Disable haptic feedback on lock screen",
-                            checked = disableHapticFeedback,
-                            onCheckedChange = { isChecked ->
-                                disableHapticFeedback = isChecked
-                                appLockRepository.setDisableHaptics(isChecked)
-                            }
-                        )
                     }
                 }
             }
@@ -281,44 +251,6 @@ fun SettingsScreen(
                     shape = RoundedCornerShape(16.dp),
                 ) {
                     Column {
-                        SettingItem(
-                            icon = Icons.Default.AutoAwesome,
-                            title = "Experimental Shizuku",
-                            description = "A more powerful app lock using Shizuku",
-                            checked = shizukuExperimental,
-                            onCheckedChange = { isChecked ->
-                                if (isChecked) {
-                                    if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_DENIED) {
-                                        if (Shizuku.isPreV11() || Shizuku.getVersion() < 11) {
-                                            shizukuPermissionLauncher.launch(ShizukuProvider.PERMISSION)
-                                        } else {
-                                            Shizuku.requestPermission(423)
-                                        }
-                                    } else {
-                                        shizukuExperimental = true
-                                        appLockRepository.setShizukuExperimentalEnabled(true)
-                                        context.stopService(
-                                            Intent(context, ShizukuAppLockService::class.java)
-                                        )
-                                        context.startService(
-                                            Intent(context, ShizukuAppLockService::class.java)
-                                        )
-                                    }
-                                } else {
-                                    shizukuExperimental = false
-                                    appLockRepository.setShizukuExperimentalEnabled(false)
-                                    context.stopService(
-                                        Intent(context, ShizukuAppLockService::class.java)
-                                    )
-                                    context.startService(
-                                        Intent(context, ShizukuAppLockService::class.java)
-                                    )
-                                }
-                            },
-                        )
-
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
                         ActionSettingItem(
                             icon = Icons.Default.Lock,
                             title = "Change PIN",
@@ -376,15 +308,6 @@ fun SettingsScreen(
                         )
                     }
                 }
-            }
-
-            // New Backend Selection Section
-            item {
-                BackendSelectionCard(
-                    appLockRepository = appLockRepository,
-                    context = context,
-                    shizukuPermissionLauncher = shizukuPermissionLauncher
-                )
             }
             item {
                 Text(
@@ -575,302 +498,6 @@ fun UnlockTimeDurationDialog(
             }
         }
     )
-}
-
-@Composable
-fun BackendSelectionCard(
-    appLockRepository: AppLockRepository,
-    context: Context,
-    shizukuPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>
-) {
-    var selectedBackend by remember { mutableStateOf(appLockRepository.getBackendImplementation()) }
-    var selectedFallback by remember { mutableStateOf(appLockRepository.getFallbackBackend()) }
-    var showFallbackDialog by remember { mutableStateOf(false) }
-
-    if (showFallbackDialog) {
-        FallbackSelectionDialog(
-            currentFallback = selectedFallback,
-            excludeBackend = selectedBackend,
-            onDismiss = { showFallbackDialog = false },
-            onConfirm = { fallback ->
-                selectedFallback = fallback
-                appLockRepository.setFallbackBackend(fallback)
-                showFallbackDialog = false
-            }
-        )
-    }
-
-    Column {
-        Text(
-            text = "Backend Implementation",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column {
-                Text(
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp),
-                    text = "Primary Method",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                BackendImplementation.entries.forEach { backend ->
-                    BackendSelectionItem(
-                        backend = backend,
-                        isSelected = selectedBackend == backend,
-                        onClick = {
-                            when (backend) {
-                                BackendImplementation.SHIZUKU -> {
-                                    if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_DENIED) {
-                                        if (Shizuku.isPreV11() || Shizuku.getVersion() < 11) {
-                                            shizukuPermissionLauncher.launch(ShizukuProvider.PERMISSION)
-                                        } else {
-                                            Shizuku.requestPermission(423)
-                                        }
-                                    } else {
-                                        selectedBackend = backend
-                                        appLockRepository.setBackendImplementation(
-                                            BackendImplementation.SHIZUKU
-                                        )
-                                        context.startService(
-                                            Intent(
-                                                context,
-                                                ShizukuAppLockService::class.java
-                                            )
-                                        )
-                                    }
-                                }
-
-                                BackendImplementation.USAGE_STATS -> {
-                                    if (!context.hasUsagePermission()) {
-                                        val intent = Intent(
-                                            android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS
-                                        )
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        context.startActivity(intent)
-                                        Toast.makeText(
-                                            context,
-                                            "Grant usage access permission.",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                        return@BackendSelectionItem
-                                    }
-
-                                    selectedBackend = backend
-
-                                    appLockRepository.setBackendImplementation(BackendImplementation.USAGE_STATS)
-                                    context.startService(
-                                        Intent(
-                                            context,
-                                            ExperimentalAppLockService::class.java
-                                        )
-                                    )
-                                }
-
-                                BackendImplementation.ACCESSIBILITY -> {
-                                    if (!context.isAccessibilityServiceEnabled()) {
-                                        openAccessibilitySettings(context)
-                                        return@BackendSelectionItem
-                                    }
-                                    selectedBackend = backend
-
-                                    appLockRepository.setBackendImplementation(BackendImplementation.ACCESSIBILITY)
-                                }
-                            }
-                        }
-                    )
-                    if (backend != BackendImplementation.entries.last()) {
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    }
-                }
-
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showFallbackDialog = true }
-                        .padding(20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        Text(
-                            text = "Fallback Method",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Text(
-                            text = "Used when primary method fails",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    TextButton(
-                        onClick = { showFallbackDialog = true }
-                    ) {
-                        Text(getBackendDisplayName(selectedFallback))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun BackendSelectionItem(
-    backend: BackendImplementation,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(modifier = Modifier.width(12.dp))
-        Icon(
-            imageVector = getBackendIcon(backend),
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = getBackendDisplayName(backend),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                )
-                if (backend == BackendImplementation.SHIZUKU) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Badge(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary
-                    ) {
-                        Text(
-                            text = "Advanced",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            }
-            Text(
-                text = getBackendDescription(backend),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        RadioButton(
-            selected = isSelected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.colorScheme.primary
-            )
-        )
-    }
-}
-
-@Composable
-fun FallbackSelectionDialog(
-    currentFallback: BackendImplementation,
-    excludeBackend: BackendImplementation,
-    onDismiss: () -> Unit,
-    onConfirm: (BackendImplementation) -> Unit
-) {
-    var selectedFallback by remember { mutableStateOf(currentFallback) }
-    val availableBackends = BackendImplementation.entries.filter { it != excludeBackend }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Select Fallback Method") },
-        text = {
-            Column {
-                Text("Pick a fallback method to use when the primary method fails:")
-                Spacer(modifier = Modifier.height(16.dp))
-
-                availableBackends.forEach { backend ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { selectedFallback = backend }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = selectedFallback == backend,
-                            onClick = { selectedFallback = backend }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = getBackendIcon(backend),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = getBackendDisplayName(backend),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(selectedFallback) }) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-private fun getBackendDisplayName(backend: BackendImplementation): String {
-    return when (backend) {
-        BackendImplementation.ACCESSIBILITY -> "Accessibility Service"
-        BackendImplementation.USAGE_STATS -> "Usage Statistics"
-        BackendImplementation.SHIZUKU -> "Shizuku"
-    }
-}
-
-private fun getBackendDescription(backend: BackendImplementation): String {
-    return when (backend) {
-        BackendImplementation.ACCESSIBILITY -> "Standard method that works on most devices"
-        BackendImplementation.USAGE_STATS -> "Experimental method with better performance"
-        BackendImplementation.SHIZUKU -> "Advanced method with superior experience"
-    }
-}
-
-private fun getBackendIcon(backend: BackendImplementation): ImageVector {
-    return when (backend) {
-        BackendImplementation.ACCESSIBILITY -> Accessibility
-        BackendImplementation.USAGE_STATS -> Icons.Default.QueryStats
-        BackendImplementation.SHIZUKU -> Icons.Default.AutoAwesome
-    }
 }
 
 @Composable

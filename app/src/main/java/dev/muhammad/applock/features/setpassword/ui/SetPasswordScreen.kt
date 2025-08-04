@@ -93,7 +93,7 @@ fun SetPasswordScreen(
 
     BackHandler {
         if (isFirstTimeSetup) {
-            Toast.makeText(context, "Please set a PIN to continue", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Set a PIN to continue", Toast.LENGTH_SHORT).show()
         } else {
             if (navController.previousBackStackEntry != null) {
                 navController.popBackStack()
@@ -110,7 +110,7 @@ fun SetPasswordScreen(
         val executor = ContextCompat.getMainExecutor(context)
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Authenticate to reset PIN")
-            .setSubtitle("Use your device PIN, pattern, or password")
+            .setSubtitle("Use your device's PIN, pattern, or password")
             .setAllowedAuthenticators(
                 BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
             )
@@ -181,7 +181,7 @@ fun SetPasswordScreen(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Please create a PIN to protect your locked apps. This PIN will be required whenever you try to access a locked app.",
+                            text = "Create a PIN to protect your locked apps. This PIN will be required whenever you try to access a locked app.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onTertiaryContainer,
                             textAlign = TextAlign.Center
@@ -236,7 +236,7 @@ fun SetPasswordScreen(
 
             if (showMismatchError) {
                 Text(
-                    text = "PIN doesn't match. Try again.",
+                    text = "Wrong! Try again.",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(8.dp)
@@ -252,7 +252,7 @@ fun SetPasswordScreen(
             }
             if (showInvalidOldPasswordError) {
                 Text(
-                    text = "Wrong. Try again.",
+                    text = "Wrong! Try again.",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(8.dp)
