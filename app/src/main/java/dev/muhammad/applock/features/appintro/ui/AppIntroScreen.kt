@@ -64,17 +64,13 @@ import dev.muhammad.applock.core.utils.launchBatterySettings
 import dev.muhammad.applock.data.repository.BackendImplementation
 import dev.muhammad.applock.features.appintro.domain.AppIntroManager
 import dev.muhammad.applock.services.ExperimentalAppLockService
-import dev.muhammad.applock.services.ShizukuAppLockService
 import dev.muhammad.applock.ui.icons.Accessibility
 import dev.muhammad.applock.ui.icons.BatterySaver
 import dev.muhammad.applock.ui.icons.Display
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuProvider
 
 enum class AppUsageMethod {
     ACCESSIBILITY,
-    USAGE_STATS,
-    SHIZUKU
+    USAGE_STATS
 }
 
 @Composable
@@ -167,19 +163,6 @@ fun AppIntroScreen(navController: NavController) {
             }
         } else null
 
-    val shizukuPermissionLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                Toast.makeText(context, "Shizuku permission granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(
-                    context,
-                    "Shizuku permission is required for advanced features.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-
     LaunchedEffect(key1 = context) {
         overlayPermissionGranted = Settings.canDrawOverlays(context)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -233,7 +216,7 @@ fun AppIntroScreen(navController: NavController) {
             title = "Disable Battery Optimisation",
             description = "This is needed to make sure App Lock is monitoring your apps in real-time and won't hesitate to protect them.",
             icon = BatterySaver,
-            backgroundColor = Color(0xFF07F348),
+            backgroundColor = Color(0xFF36CA5F),
             contentColor = Color.White,
             onNext = {
                 val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -250,7 +233,7 @@ fun AppIntroScreen(navController: NavController) {
             title = "Notification Permission",
             description = "This permission is needed just to make sure the system won't terminate the app.",
             icon = Icons.Default.Notifications,
-            backgroundColor = Color(0xFFE702C3),
+            backgroundColor = Color(0xFFFFD304),
             contentColor = Color.White,
             onNext = {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -318,14 +301,6 @@ fun AppIntroScreen(navController: NavController) {
                     onClick = { selectedMethod = AppUsageMethod.USAGE_STATS },
                 )
 
-                MethodSelectionCard(
-                    title = "Shizuku",
-                    description = "Advanced method with better performance and superior experience. Requires Shizuku app installed and enabled via ADB or root.",
-                    icon = Icons.Default.QueryStats,
-                    isSelected = selectedMethod == AppUsageMethod.SHIZUKU,
-                    onClick = { selectedMethod = AppUsageMethod.SHIZUKU },
-                )
-
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "You can change this later in settings",
@@ -388,42 +363,6 @@ fun AppIntroScreen(navController: NavController) {
                 }
             )
         )
-
-        AppUsageMethod.SHIZUKU -> listOf(
-            IntroPage(
-                title = "Shizuku",
-                description = "Shizuku allows you to lock system apps.\n\nMake sure you have Shizuku installed and enabled via ADB or root. Tap 'Next' to grant the permission.",
-                icon = Icons.Default.QueryStats,
-                backgroundColor = Color(0xFFCE5151),
-                contentColor = Color.White,
-                onNext = {
-                    val isGranted = if (Shizuku.isPreV11() || Shizuku.getVersion() < 11) {
-                        checkSelfPermission(
-                            context,
-                            ShizukuProvider.PERMISSION
-                        ) == PermissionChecker.PERMISSION_GRANTED
-                    } else {
-                        Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-                    }
-
-                    if (!isGranted) {
-                        if (Shizuku.isPreV11() || Shizuku.getVersion() < 11) {
-                            shizukuPermissionLauncher.launch(ShizukuProvider.PERMISSION)
-                        } else {
-                            Shizuku.requestPermission(423)
-                        }
-                        false
-                    } else {
-                        context.appLockRepository()
-                            .setBackendImplementation(BackendImplementation.SHIZUKU)
-                        context.startService(
-                            Intent(context, ShizukuAppLockService::class.java)
-                        )
-                        true
-                    }
-                }
-            )
-        )
     }
 
     val finalPage = IntroPage(
@@ -442,16 +381,6 @@ fun AppIntroScreen(navController: NavController) {
             val methodPermissionGranted = when (selectedMethod) {
                 AppUsageMethod.ACCESSIBILITY -> context.isAccessibilityServiceEnabled()
                 AppUsageMethod.USAGE_STATS -> context.hasUsagePermission()
-                AppUsageMethod.SHIZUKU -> {
-                    if (Shizuku.isPreV11() || Shizuku.getVersion() < 11) {
-                        checkSelfPermission(
-                            context,
-                            ShizukuProvider.PERMISSION
-                        ) == PermissionChecker.PERMISSION_GRANTED
-                    } else {
-                        Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-                    }
-                }
             }
 
             // Only require all permissions if accessibility is selected
