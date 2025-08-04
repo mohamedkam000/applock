@@ -47,7 +47,7 @@ fun launchBatterySettings(context: Context) {
         context.startActivity(requestIgnoreIntent)
         Toast.makeText(
             context,
-            "Allow App Locl to bypass battery optimisations",
+            "Allow App Lock to bypass battery optimisations",
             Toast.LENGTH_LONG
         ).show()
     } else {
