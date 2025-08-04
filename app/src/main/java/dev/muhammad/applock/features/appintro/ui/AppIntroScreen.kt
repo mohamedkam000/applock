@@ -184,7 +184,7 @@ fun AppIntroScreen(navController: NavController) {
             title = "Welcome to App Lock",
             description = "This is an app locker made for a university project.",
             icon = Icons.Filled.Lock,
-            backgroundColor = Color(0xFF8CFFF0),
+            backgroundColor = Color(0xFF0ADCFF),
             contentColor = Color.White,
             onNext = { true }
         ),
