@@ -47,7 +47,7 @@ fun launchBatterySettings(context: Context) {
         context.startActivity(requestIgnoreIntent)
         Toast.makeText(
             context,
-            "Please allow our app to ignore battery optimizations.",
+            "Allow App Locl to bypass battery optimisations",
             Toast.LENGTH_LONG
         ).show()
     } else {
@@ -57,14 +57,14 @@ fun launchBatterySettings(context: Context) {
             context.startActivity(standardIntent)
             Toast.makeText(
                 context,
-                "Could not find specific settings. Please remove app from battery restrictions.",
+                "Could not find the setting. Remove app from battery restrictions.",
                 Toast.LENGTH_LONG
             ).show()
         } else {
             // Very rare case where even the standard settings screen is missing.
             Toast.makeText(
                 context,
-                "Could not open any battery settings.",
+                "Couldn't open battery settings",
                 Toast.LENGTH_LONG
             ).show()
         }

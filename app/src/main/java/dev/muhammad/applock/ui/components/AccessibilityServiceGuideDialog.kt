@@ -42,14 +42,14 @@ fun AccessibilityServiceGuideDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "App Lock needs accessibility permission to detect when protected apps are launched.",
+                    text = "App Lock needs the accessibility permission to detect when protected apps are being launched.",
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Please follow these steps:",
+                    text = "Follow these steps:",
                     textAlign = TextAlign.Start,
                     modifier = Modifier.fillMaxWidth()
                 )

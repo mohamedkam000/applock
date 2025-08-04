@@ -42,7 +42,7 @@ fun AdminPasswordVerificationDialog(
         properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
         title = {
             Text(
-                text = "Password Verification Required",
+                text = "Verification Required",
                 style = MaterialTheme.typography.titleLarge
             )
         },
@@ -52,7 +52,7 @@ fun AdminPasswordVerificationDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Please enter your app lock password to disable admin permissions",
+                    text = "Enter your PIN to disable admin permissions",
                     textAlign = TextAlign.Center
                 )
 
@@ -64,7 +64,7 @@ fun AdminPasswordVerificationDialog(
                         password = it
                         error = "" // Clear error when user types
                     },
-                    label = { Text("Password") },
+                    label = { Text("PIN") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     isError = error.isNotEmpty(),
@@ -95,11 +95,11 @@ fun AdminPasswordVerificationDialog(
                 Button(
                     onClick = {
                         if (password.isEmpty()) {
-                            error = "Password cannot be empty"
+                            error = "PIN cannot be empty"
                         } else if (validatePassword(password)) {
                             onPasswordVerified()
                         } else {
-                            error = "Incorrect password"
+                            error = "Wrong PIN"
                         }
                     }
                 ) {

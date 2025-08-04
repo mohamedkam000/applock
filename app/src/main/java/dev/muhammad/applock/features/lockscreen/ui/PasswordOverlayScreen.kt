@@ -328,7 +328,7 @@ fun PasswordOverlayScreen(
 
             if (showError) {
                 Text(
-                    text = "Incorrect PIN. Please try again.",
+                    text = "Wrong. Try again.",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp)

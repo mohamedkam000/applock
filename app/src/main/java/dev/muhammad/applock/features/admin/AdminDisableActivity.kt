@@ -79,7 +79,7 @@ class AdminDisableActivity : ComponentActivity() {
                                 if (!isValid) {
                                     Toast.makeText(
                                         this,
-                                        "Incorrect password. Please try again.",
+                                        "Wrong. Try again.",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -131,7 +131,7 @@ fun AdminDisableScreen(
 
             if (showError.value) {
                 Text(
-                    text = "Incorrect PIN. Please try again.",
+                    text = "Wrong. Try again.",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp)
