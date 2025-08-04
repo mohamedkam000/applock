@@ -138,9 +138,9 @@ fun SetPasswordScreen(
                     Text(
                         text = when {
                             isFirstTimeSetup -> "Welcome to App Lock"
-                            isVerifyOldPasswordMode -> "Enter Current PIN"
-                            isConfirmationMode -> "Confirm PIN"
-                            else -> "Set New PIN"
+                            isVerifyOldPasswordMode -> "Enter your Current PIN"
+                            isConfirmationMode -> "Confirm your PIN"
+                            else -> "Set a new PIN"
                         },
                         style = MaterialTheme.typography.titleLargeEmphasized,
                     )
@@ -161,35 +161,6 @@ fun SetPasswordScreen(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (isFirstTimeSetup && !isConfirmationMode && !isVerifyOldPasswordMode) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Secure Your Apps",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "Create a PIN to protect your locked apps. This PIN will be required whenever you try to access a locked app.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -203,35 +174,6 @@ fun SetPasswordScreen(
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Center
                 )
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                    tooltip = {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Text(
-                                text = when {
-                                    isVerifyOldPasswordMode -> "Enter your current PIN"
-                                    isConfirmationMode -> "Write the PIN again"
-                                    else -> "Set a 6-digit PIN"
-                                },
-                                modifier = Modifier.padding(8.dp),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    },
-                    state = rememberTooltipState()
-                ) {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "Information",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
             }
 
             if (showMismatchError) {
@@ -312,17 +254,6 @@ fun SetPasswordScreen(
                     }
                 }
             }
-
-            Text(
-                text = when {
-                    isVerifyOldPasswordMode -> "Enter your current PIN"
-                    isConfirmationMode -> "Again"
-                    else -> "Write a 6-digit PIN"
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.alpha(0.8f),
-                textAlign = TextAlign.Center
-            )
 
             Spacer(modifier = Modifier.weight(1f))
 

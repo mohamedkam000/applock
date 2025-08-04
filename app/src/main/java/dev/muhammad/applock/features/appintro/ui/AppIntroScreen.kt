@@ -184,7 +184,7 @@ fun AppIntroScreen(navController: NavController) {
             title = "Welcome to App Lock",
             description = "This is an app locker made for a university project.",
             icon = Icons.Filled.Lock,
-            backgroundColor = Color(0xFF13C98A),
+            backgroundColor = Color(0xFF8CFFF0),
             contentColor = Color.White,
             onNext = { true }
         ),
@@ -233,7 +233,7 @@ fun AppIntroScreen(navController: NavController) {
             title = "Notification Permission",
             description = "This permission is needed just to make sure the system won't terminate the app.",
             icon = Icons.Default.Notifications,
-            backgroundColor = Color(0xFFFFD304),
+            backgroundColor = Color(0xFFFFA700),
             contentColor = Color.White,
             onNext = {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -301,13 +301,6 @@ fun AppIntroScreen(navController: NavController) {
                     onClick = { selectedMethod = AppUsageMethod.USAGE_STATS },
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "You can change this later in settings",
-                    fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         },
