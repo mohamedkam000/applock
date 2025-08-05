@@ -36,7 +36,7 @@ App Lock is a well-designed Android app locker designed to protect your privacy.
 ```text
 MIT License
 
-Copyright (c) 2023-2025 Muhammad Kamal
+Copyright (c) 2025 Muhammad Kamal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
