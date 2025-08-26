@@ -1,36 +1,13 @@
 package dev.muhammad.appintro
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -45,19 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-/**
- * A modern Material 3 App Intro component for Android applications.
- *
- * @param pages List of [IntroPage] to display in the intro
- * @param onSkip Called when the user skips the intro (optional)
- * @param onFinish Called when the user completes the intro
- * @param showSkipButton Whether to show the skip button (defaults to true)
- * @param useAnimatedPager Whether to use enhanced animations between pages (defaults to true)
- * @param nextButtonText Text for the next button (defaults to "Next")
- * @param skipButtonText Text for the skip button (defaults to "Skip")
- * @param finishButtonText Text for the finish button (defaults to "Get Started")
- * @param backButtonText Text for the back button (defaults to "Back")
- */
 @OptIn(
     ExperimentalAnimationApi::class,
     ExperimentalMaterial3ExpressiveApi::class
@@ -78,7 +42,6 @@ fun AppIntro(
     val coroutineScope = rememberCoroutineScope()
     val colorScheme = MaterialTheme.colorScheme
 
-    // Remember the current page backgroundColor for button tinting
     val currentPageColor by remember(pagerState.currentPage) {
         derivedStateOf {
             pages.getOrNull(pagerState.currentPage)?.backgroundColor
@@ -86,7 +49,6 @@ fun AppIntro(
         }
     }
 
-    // Remember the current page text color for buttons
     val currentPageTextColor by remember(pagerState.currentPage) {
         derivedStateOf {
             pages.getOrNull(pagerState.currentPage)?.contentColor
@@ -97,7 +59,6 @@ fun AppIntro(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Content pager
         if (useAnimatedPager) {
             AnimatedIntroPager(
                 pages = pages,
@@ -116,7 +77,6 @@ fun AppIntro(
             }
         }
 
-        // Bottom navigation with gradient overlay
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -136,7 +96,6 @@ fun AppIntro(
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                // Indicators
                 PageIndicators(
                     pageCount = pages.size,
                     currentPage = pagerState.currentPage,
@@ -147,12 +106,10 @@ fun AppIntro(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Skip button with animation
                     AnimatedVisibility(
                         visible = showSkipButton && pagerState.currentPage < pages.size - 1,
                         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -172,8 +129,6 @@ fun AppIntro(
                         }
                     }
 
-
-                    // Back button with animation - only visible when not on first page
                     AnimatedVisibility(
                         visible = pagerState.currentPage > 0,
                         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -201,17 +156,13 @@ fun AppIntro(
                         Spacer(modifier = Modifier.weight(1f))
                     }
 
-                    // Next/Finish button
                     if (pagerState.currentPage < pages.size - 1) {
                         FilledTonalButton(
                             onClick = {
-                                // Get current page
                                 val currentPage = pages[pagerState.currentPage]
 
-                                // Execute the page's onNext callback if it exists
                                 val canProceed = currentPage.onNext?.invoke() ?: true
 
-                                // Only proceed to next page if callback returns true or is null
                                 if (canProceed) {
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
@@ -226,7 +177,6 @@ fun AppIntro(
                                 .clip(RoundedCornerShape(24.dp))
                                 .height(48.dp)
                         ) {
-                            // Animated text content that transitions when text changes
                             AnimatedContent(
                                 targetState = nextButtonText,
                                 transitionSpec = {
@@ -250,11 +200,9 @@ fun AppIntro(
                     } else {
                         Button(
                             onClick = {
-                                // Execute the last page's onNext callback if it exists
                                 val currentPage = pages[pagerState.currentPage]
                                 val canFinish = currentPage.onNext?.invoke() ?: true
 
-                                // Only finish if callback returns true or is null
                                 if (canFinish) {
                                     onFinish()
                                 }
@@ -267,7 +215,6 @@ fun AppIntro(
                                 .clip(RoundedCornerShape(24.dp))
                                 .height(52.dp)
                         ) {
-                            // Animated text content for the finish button
                             AnimatedContent(
                                 targetState = finishButtonText,
                                 transitionSpec = {
@@ -295,9 +242,6 @@ fun AppIntro(
     }
 }
 
-/**
- * Navigates to the next page in the intro
- */
 fun navigateToNextPage(pagerState: PagerState, scope: kotlinx.coroutines.CoroutineScope) {
     scope.launch {
         if (pagerState.currentPage < pagerState.pageCount - 1) {
@@ -306,9 +250,6 @@ fun navigateToNextPage(pagerState: PagerState, scope: kotlinx.coroutines.Corouti
     }
 }
 
-/**
- * Navigates to the previous page in the intro
- */
 fun navigateToPreviousPage(pagerState: PagerState, scope: kotlinx.coroutines.CoroutineScope) {
     scope.launch {
         if (pagerState.currentPage > 0) {
