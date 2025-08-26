@@ -11,17 +11,7 @@ class BootReceiver : BroadcastReceiver() {
         if (Intent.ACTION_BOOT_COMPLETED == intent!!.action) {
             val appLockRepository = context.appLockRepository()
 
-            if (appLockRepository.isAntiUninstallEnabled()) {
-                val serviceIntent = Intent(context, AppLockAccessibilityService::class.java)
-                context.startService(serviceIntent)
-            }
-
             when (appLockRepository.getBackendImplementation()) {
-                BackendImplementation.SHIZUKU -> {
-                    val serviceIntent = Intent(context, ShizukuAppLockService::class.java)
-                    context.startService(serviceIntent)
-                }
-
                 BackendImplementation.ACCESSIBILITY -> {
                     val serviceIntent = Intent(context, AppLockAccessibilityService::class.java)
                     context.startService(serviceIntent)

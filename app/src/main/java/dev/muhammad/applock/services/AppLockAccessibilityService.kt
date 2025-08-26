@@ -3,7 +3,6 @@ package dev.muhammad.applock.services
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.annotation.SuppressLint
-import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -13,7 +12,6 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import dev.muhammad.applock.core.broadcast.DeviceAdmin
 import dev.muhammad.applock.data.repository.AppLockRepository
 import dev.muhammad.applock.data.repository.BackendImplementation
 import dev.muhammad.applock.features.lockscreen.ui.PasswordOverlayActivity
@@ -40,7 +38,6 @@ class AppLockAccessibilityService : AccessibilityService() {
         private const val TAG = "AppLockAccessibility"
         var isServiceRunning = false
         private var instance: AppLockAccessibilityService? = null
-        private const val DEVICE_ADMIN_SETTINGS_PACKAGE = "com.android.settings"
         private const val APP_PACKAGE_PREFIX = "dev.muhammad.applock"
 
         fun getInstance(): AppLockAccessibilityService? = instance
@@ -78,32 +75,14 @@ class AppLockAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (!::appLockRepository.isInitialized) return
 
-        // Always handle device admin deactivation regardless of backend
-        if (appLockRepository.isAntiUninstallEnabled() && event.packageName == DEVICE_ADMIN_SETTINGS_PACKAGE) {
-            Log.d(TAG, "In settings, in activity: ${event.className}")
-            checkForDeviceAdminDeactivation(event)
-        }
-
-        // Check if accessibility should handle app locking
         val currentBackend = appLockRepository.getBackendImplementation()
         val shouldHandleAppLocking = when (currentBackend) {
             BackendImplementation.ACCESSIBILITY -> {
-                Log.d(TAG, "Accessibility is the chosen backend, handling app locking")
                 true
             }
-
-            BackendImplementation.SHIZUKU -> {
-                val shouldFallback = !isServiceRunning(ShizukuAppLockService::class.java)
-                if (shouldFallback) {
-                    Log.d(TAG, "Shizuku service not running, accessibility acting as fallback")
-                }
-                shouldFallback
-            }
-
             BackendImplementation.USAGE_STATS -> {
                 val shouldFallback = !isServiceRunning(ExperimentalAppLockService::class.java)
                 if (shouldFallback) {
-                    Log.d(TAG, "Experimental service not running, accessibility acting as fallback")
                 }
                 shouldFallback
             }
@@ -114,7 +93,6 @@ class AppLockAccessibilityService : AccessibilityService() {
         }
 
         if (isDeviceLocked()) {
-            Log.d(TAG, "Device is locked, ignoring event")
             AppLockManager.appUnlockTimes.clear()
             AppLockManager.clearTemporarilyUnlockedApp()
             return
@@ -122,12 +100,6 @@ class AppLockAccessibilityService : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: return
 
-        if (appLockRepository.isAntiUninstallEnabled() && packageName == DEVICE_ADMIN_SETTINGS_PACKAGE) {
-            Log.d(TAG, "In settings, in activity: ${event.className}")
-            checkForDeviceAdminDeactivation(event)
-        }
-
-        // Dont continue if its system or our app or keyboard package
         if (packageName.startsWith(APP_PACKAGE_PREFIX) || packageName in getKeyboardPackageNames()) {
             return
         }
@@ -183,47 +155,6 @@ class AppLockAccessibilityService : AccessibilityService() {
         checkAndLockApp(packageName, event.eventTime)
     }
 
-    private fun checkForDeviceAdminDeactivation(event: AccessibilityEvent) {
-        val rootNode = rootInActiveWindow ?: return
-
-        try {
-            // works atleast on Stock Android/Motorola devices
-            val isDeviceAdminPage =
-                (event.className in knownAdminConfigClasses) || (findNodeWithTextContaining(
-                    rootNode,
-                    "Device admin"
-                ) != null)
-
-
-            val isOurAppVisible = findNodeWithTextContaining(
-                rootNode,
-                "App Lock"
-            ) != null || findNodeWithTextContaining(rootNode, "AppLock") != null
-
-            if (!isDeviceAdminPage || !isOurAppVisible) {
-                return
-            }
-
-            val dpm = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            val component = ComponentName(this, DeviceAdmin::class.java)
-            if (dpm.isAdminActive(component)) {
-                // go to home screen with accessibility service
-                Log.d(TAG, "Device admin is active, navigating to home screen")
-                performGlobalAction(GLOBAL_ACTION_HOME)
-
-                Log.d(TAG, rootInActiveWindow.className.toString())
-
-                Toast.makeText(
-                    this,
-                    "Disable anti-uninstall from AppLock settings to remove this restriction.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error checking for device admin deactivation", e)
-        }
-    }
-
     private fun findNodeWithTextContaining(
         node: AccessibilityNodeInfo, text: String
     ): AccessibilityNodeInfo? {
@@ -258,14 +189,11 @@ class AppLockAccessibilityService : AccessibilityService() {
         super.onDestroy()
         isServiceRunning = false
         instance = null
-
-        Log.d(TAG, "Accessibility service destroyed")
         AppLockManager.startFallbackServices(this, AppLockAccessibilityService::class.java)
     }
 
     fun checkAndLockApp(packageName: String, currentTime: Long) {
-        if (AppLockManager.isLockScreenShown.get()) { // Check if lock screen is already shown
-            Log.d(TAG, "Password overlay already active, skipping app lock for $packageName")
+        if (AppLockManager.isLockScreenShown.get()) {
             return
         }
 
@@ -273,11 +201,9 @@ class AppLockAccessibilityService : AccessibilityService() {
             return
         }
         if (AppLockManager.currentBiometricState == BiometricState.AUTH_STARTED) {
-            Log.d(TAG, "Biometric authentication in progress, skipping app lock for $packageName")
             return
         }
         if (AppLockManager.isAppTemporarilyUnlocked(packageName)) {
-            Log.d(TAG, "App $packageName is temporarily unlocked, skipping app lock")
             return
         } else {
             AppLockManager.clearTemporarilyUnlockedApp()
@@ -288,17 +214,12 @@ class AppLockAccessibilityService : AccessibilityService() {
             return
         }
 
-        // Check if app is within unlock time period
         val unlockDuration = appLockRepository.getUnlockTimeDuration()
         val unlockTimestamp = AppLockManager.appUnlockTimes[packageName] ?: 0
 
         if (unlockDuration > 0 && unlockTimestamp > 0) {
             val elapsedMinutes = (currentTime - unlockTimestamp) / (60 * 1000)
             if (elapsedMinutes < unlockDuration) {
-                Log.d(
-                    TAG,
-                    "App $packageName is within unlock time period ($elapsedMinutes/${unlockDuration}min)"
-                )
                 if (!AppLockManager.isAppTemporarilyUnlocked(packageName)) {
                     AppLockManager.unlockApp(packageName)
                 }
@@ -311,8 +232,6 @@ class AppLockAccessibilityService : AccessibilityService() {
             }
         }
 
-        Log.d(TAG, "Locked app detected: $packageName")
-
         val intent = Intent(this, PasswordOverlayActivity::class.java).apply {
             flags =
                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_FROM_BACKGROUND or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
@@ -320,11 +239,10 @@ class AppLockAccessibilityService : AccessibilityService() {
         }
 
         try {
-            AppLockManager.isLockScreenShown.set(true) // Set to true before attempting to start
+            AppLockManager.isLockScreenShown.set(true)
             startActivity(intent)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to start password overlay: ${e.message}", e)
-            AppLockManager.isLockScreenShown.set(false) // Reset on failure
+            AppLockManager.isLockScreenShown.set(false)
         }
     }
 
@@ -349,38 +267,20 @@ class AppLockAccessibilityService : AccessibilityService() {
     }
 
     private fun startServices() {
-        // Stop all services first to ensure only one runs at a time
         stopAllServices()
 
-        // Start only the primary backend service
         when (appLockRepository.getBackendImplementation()) {
-            BackendImplementation.SHIZUKU -> {
-                Log.d(TAG, "Starting Shizuku service as primary backend")
-                startService(Intent(this, ShizukuAppLockService::class.java))
-            }
-
             BackendImplementation.USAGE_STATS -> {
-                Log.d(TAG, "Starting Experimental service as primary backend")
                 startService(Intent(this, ExperimentalAppLockService::class.java))
             }
 
-            else -> {
-                Log.d(
-                    TAG,
-                    "Accessibility service is the primary backend, no additional service needed"
-                )
-            }
+            else -> { }
         }
     }
 
     private fun stopAllServices() {
-        Log.d(TAG, "Stopping all app lock services")
-
         try {
             stopService(Intent(this, ExperimentalAppLockService::class.java))
-            stopService(Intent(this, ShizukuAppLockService::class.java))
-        } catch (e: Exception) {
-            Log.e(TAG, "Error stopping services", e)
-        }
+        } catch (e: Exception)
     }
 }

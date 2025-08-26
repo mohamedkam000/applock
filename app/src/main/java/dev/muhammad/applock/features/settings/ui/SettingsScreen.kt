@@ -31,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
-import dev.muhammad.applock.core.broadcast.DeviceAdmin
 import dev.muhammad.applock.core.navigation.Screen
 import dev.muhammad.applock.core.utils.hasUsagePermission
 import dev.muhammad.applock.core.utils.isAccessibilityServiceEnabled
@@ -88,7 +87,6 @@ fun SettingsScreen(
             onDismiss = { showPermissionDialog = false },
             onConfirm = {
                 showPermissionDialog = false
-                showDeviceAdminDialog = true
             }
         )
     }
@@ -100,9 +98,7 @@ fun SettingsScreen(
                 showAccessibilityDialog = false
                 openAccessibilitySettings(context)
 
-//                val dpm =
-//                    context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-//                val component = ComponentName(context, DeviceAdmin::class.java)
+                val component = ComponentName(context)
             }
         )
     }

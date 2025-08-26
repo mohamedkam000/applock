@@ -19,13 +19,6 @@ var knownRecentsClasses = setOf(
     "com.android.systemui.recents.RecentsPanelView"
 )
 
-var knownAdminConfigClasses = setOf(
-    "com.android.settings.deviceadmin.DeviceAdminAdd",
-    "com.android.settings.applications.specialaccess.deviceadmin.DeviceAdminAdd",
-    "com.android.settings.deviceadmin.DeviceAdminSettings",
-    "com.android.settings.deviceadmin.DeviceAdminAdd"
-)
-
 var knownAccessibilitySettingsClasses = setOf(
     "com.android.settings.accessibility.AccessibilitySettings",
     "com.android.settings.accessibility.AccessibilityMenuActivity",
@@ -107,22 +100,10 @@ object AppLockManager {
                 startServiceByBackend(context, fallbackBackend)
             }
 
-            ShizukuAppLockService::class.java -> {
-                Log.d("AppLockManager", "Shizuku service failed, trying fallback")
-                if (AppLockAccessibilityService.isServiceRunning) {
-                    Log.d("AppLockManager", "Accessibility service is running, no fallback needed")
-                    return
-                }
-                startServiceByBackend(context, BackendImplementation.USAGE_STATS)
-            }
-
             ExperimentalAppLockService::class.java -> {
-                Log.d("AppLockManager", "Experimental service failed, trying fallback")
                 if (AppLockAccessibilityService.isServiceRunning) {
-                    Log.d("AppLockManager", "Accessibility service is running, no fallback needed")
                     return
                 }
-                startServiceByBackend(context, BackendImplementation.SHIZUKU)
             }
         }
 
@@ -135,17 +116,14 @@ object AppLockManager {
         val lastRestart = lastRestartTime[serviceName] ?: 0
 
         if (currentTime - lastRestart < SERVICE_RESTART_INTERVAL_MS) {
-            Log.d("AppLockManager", "Service $serviceName restart too recent, skipping")
             return false
         }
 
         if (attempts >= MAX_RESTART_ATTEMPTS) {
             if (currentTime - lastRestart > RESTART_COOLDOWN_MS) {
-                Log.d("AppLockManager", "Cooldown expired for $serviceName, resetting attempts")
                 serviceRestartAttempts[serviceName] = 0
                 return true
             }
-            Log.d("AppLockManager", "Max restart attempts reached for $serviceName, in cooldown")
             return false
         }
 
@@ -157,31 +135,18 @@ object AppLockManager {
         val currentAttempts = serviceRestartAttempts[serviceName] ?: 0
         serviceRestartAttempts[serviceName] = currentAttempts + 1
         lastRestartTime[serviceName] = currentTime
-
-        Log.d("AppLockManager", "Recorded restart attempt ${currentAttempts + 1} for $serviceName")
     }
 
     private fun startServiceByBackend(context: Context, backend: BackendImplementation) {
         try {
-            // Stop all other services first to ensure only one runs at a time
             stopAllServices(context)
 
             when (backend) {
-                BackendImplementation.SHIZUKU -> {
-                    Log.d("AppLockManager", "Starting Shizuku service as fallback")
-                    context.startService(Intent(context, ShizukuAppLockService::class.java))
-                }
-
                 BackendImplementation.USAGE_STATS -> {
-                    Log.d("AppLockManager", "Starting Experimental service as fallback")
                     context.startService(Intent(context, ExperimentalAppLockService::class.java))
                 }
 
                 BackendImplementation.ACCESSIBILITY -> {
-                    Log.d(
-                        "AppLockManager",
-                        "Accessibility service runs automatically when enabled, cannot start programmatically"
-                    )
                 }
             }
         } catch (e: Exception) {
@@ -194,7 +159,6 @@ object AppLockManager {
 
         try {
             context.stopService(Intent(context, ExperimentalAppLockService::class.java))
-            context.stopService(Intent(context, ShizukuAppLockService::class.java))
         } catch (e: Exception) {
             Log.e("AppLockManager", "Error stopping services", e)
         }

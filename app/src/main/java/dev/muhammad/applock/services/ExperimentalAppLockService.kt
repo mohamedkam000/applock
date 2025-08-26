@@ -73,13 +73,6 @@ class ExperimentalAppLockService : Service() {
     }
 
     private fun stopOtherServices() {
-        Log.d(TAG, "Stopping other app lock services")
-
-        try {
-            stopService(Intent(this, ShizukuAppLockService::class.java))
-        } catch (e: Exception) {
-            Log.e(TAG, "Error stopping other services", e)
-        }
     }
 
     override fun onDestroy() {
@@ -167,7 +160,7 @@ class ExperimentalAppLockService : Service() {
                 if (event.className == "dev.muhammad.applock.features.lockscreen.ui.PasswordOverlayActivity") {
                     continue
                 }
-                if (event.className in knownRecentsClasses || event.className in knownAdminConfigClasses) {
+                if (event.className in knownRecentsClasses) {
                     continue
                 }
                 if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
