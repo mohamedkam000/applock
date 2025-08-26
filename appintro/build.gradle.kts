@@ -29,13 +29,12 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.0-alpha01")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0-alpha01")
-    implementation("androidx.activity:activity-compose:1.9.0-alpha01")
+    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0-alpha02")
+    implementation("androidx.activity:activity-compose:1.12.0-alpha06")
     implementation(platform("androidx.compose:compose-bom:2025.08.00"))
-    implementation("androidx.compose.ui:ui:1.6.0-alpha03")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.6.0-alpha03")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha05")
-    implementation("androidx.compose.material3:material3-expressive:1.0.0-alpha05")
+    implementation("androidx.compose.ui:ui:1.10.0-alpha01")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.10.0-alpha01")
+    implementation("androidx.compose.material3:material3:1.5.0-alpha02")
     implementation("androidx.compose.material:material-icons-core:1.7.8")
 }
