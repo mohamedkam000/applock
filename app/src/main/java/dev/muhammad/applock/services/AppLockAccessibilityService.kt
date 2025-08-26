@@ -7,7 +7,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodManager
@@ -66,8 +65,6 @@ class AppLockAccessibilityService : AccessibilityService() {
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_VISUAL
         info.packageNames = null
         serviceInfo = info
-        Log.d(TAG, "Accessibility service connected")
-
         AppLockManager.resetRestartAttempts("AppLockAccessibilityService")
         appLockRepository.setActiveBackend(BackendImplementation.ACCESSIBILITY)
     }
@@ -106,24 +103,15 @@ class AppLockAccessibilityService : AccessibilityService() {
 
         if (event.className in knownRecentsClasses) {
             recentsPackage = packageName
-            Log.d(TAG, "Recents activity detected: $packageName")
             return
         }
 
         val lockedApps = appLockRepository.getLockedApps()
 
-        // Apply the rapid events filter to all apps to prevent accidental locks when opening recents
-        // This is a "hack" to prevent locking apps when user opens recents because a bug in Android causes
-        // the last foreground app to come to foreground momentarily, atleast according to accessibility events
         if (lastEvents.size >= 2) {
             val firstEvent = lastEvents.first()
             val lastEvent = lastEvents.last()
             val secondLastEvent = lastEvents[lastEvents.size - 2]
-
-            Log.d(
-                TAG,
-                "Last events: ${lastEvents.map { it.first.packageName.toString() + " at " + it.second.toString() }}"
-            )
 
             if (secondLastEvent.first.packageName in lockedApps && lastEvent.first.packageName == "com.android.vending" && lastEvent.second - secondLastEvent.second < 5000) {
                 return
@@ -133,12 +121,10 @@ class AppLockAccessibilityService : AccessibilityService() {
                     lastEvent.first.packageName.toString()
                 ) && lastEvent.second - secondLastEvent.second < 5000
             ) {
-                Log.d(TAG, "Ignoring rapid events for launcher and keyboard package: $packageName")
                 return
             }
 
             if (firstEvent.first.packageName in lockedApps && firstEvent.first.packageName == lastEvent.first.packageName && lastEvent.second - firstEvent.second < 5000) {
-                Log.d(TAG, "Ignoring rapid events for same package: $packageName")
                 return
             }
         }
@@ -146,10 +132,6 @@ class AppLockAccessibilityService : AccessibilityService() {
         if (AppLockManager.isAppTemporarilyUnlocked(packageName)) {
             return
         }
-        Log.d(
-            TAG,
-            "Clearing unlocked app: ${AppLockManager.temporarilyUnlockedApp} because new event for package: $packageName"
-        )
         AppLockManager.clearTemporarilyUnlockedApp()
         lastForegroundPackage = packageName
         checkAndLockApp(packageName, event.eventTime)
@@ -174,11 +156,9 @@ class AppLockAccessibilityService : AccessibilityService() {
     }
 
     override fun onInterrupt() {
-        Log.d(TAG, "Accessibility service interrupted")
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.d(TAG, "Accessibility service unbound")
         isServiceRunning = false
         instance = null
         AppLockManager.startFallbackServices(this, AppLockAccessibilityService::class.java)

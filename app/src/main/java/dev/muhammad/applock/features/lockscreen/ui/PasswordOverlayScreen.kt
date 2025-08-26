@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.addCallback
 import androidx.activity.compose.BackHandler
@@ -63,7 +62,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import dev.muhammad.applock.core.ui.shapes
 import dev.muhammad.applock.core.utils.appLockRepository
-import dev.muhammad.applock.core.utils.vibrate
 import dev.muhammad.applock.data.repository.AppLockRepository
 import dev.muhammad.applock.services.AppLockAccessibilityService
 import dev.muhammad.applock.services.AppLockManager
@@ -94,7 +92,6 @@ class PasswordOverlayActivity : FragmentActivity() {
 
         lockedPackageNameFromIntent = intent.getStringExtra("locked_package")
         if (lockedPackageNameFromIntent == null) {
-            Log.e(TAG, "No locked_package name provided in intent. Finishing.")
             finishAffinity()
             return
         }
@@ -123,9 +120,6 @@ class PasswordOverlayActivity : FragmentActivity() {
 
         val layoutParams = window.attributes
         layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        if (appLockRepository.shouldUseMaxBrightness()) {
-            layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
-        }
         window.attributes = layoutParams
     }
 
@@ -136,7 +130,6 @@ class PasswordOverlayActivity : FragmentActivity() {
                     packageManager.getApplicationInfo(lockedPackageNameFromIntent!!, 0)
                 ).toString()
             } catch (e: Exception) {
-                Log.e(TAG, "Error loading app name: ${e.message}")
                 appName = "App"
             }
 
@@ -211,7 +204,6 @@ class PasswordOverlayActivity : FragmentActivity() {
                 super.onAuthenticationError(errorCode, errString)
                 isBiometricPromptShowingLocal = false
                 AppLockManager.reportBiometricAuthFinished()
-                Log.w(TAG, "Authentication error: $errString ($errorCode)")
             }
 
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
@@ -235,14 +227,6 @@ class PasswordOverlayActivity : FragmentActivity() {
     }
 
     private fun applyUserPreferences() {
-        if (appLockRepository.shouldUseMaxBrightness()) {
-            window.attributes = window.attributes.apply {
-                screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
-            }
-            if (window.decorView.isAttachedToWindow) {
-                windowManager.updateViewLayout(window.decorView, window.attributes)
-            }
-        }
     }
 
     fun triggerBiometricPromptIfNeeded() {
@@ -252,7 +236,6 @@ class PasswordOverlayActivity : FragmentActivity() {
             try {
                 biometricPrompt.authenticate(promptInfo)
             } catch (e: Exception) {
-                Log.e(TAG, "Error calling biometricPrompt.authenticate: ${e.message}", e)
                 isBiometricPromptShowingLocal = false
                 AppLockManager.reportBiometricAuthFinished()
             }
@@ -262,9 +245,8 @@ class PasswordOverlayActivity : FragmentActivity() {
     override fun onPause() {
         super.onPause()
         movedToBackground = true
-        AppLockManager.isLockScreenShown.set(false) // Set to false when activity is no longer visible
+        AppLockManager.isLockScreenShown.set(false)
         if (!isFinishing && !isDestroyed) {
-            Log.d(TAG, "Activity moved to background: $lockedPackageNameFromIntent")
             AppLockManager.reportBiometricAuthFinished()
             finish()
         }
@@ -272,9 +254,8 @@ class PasswordOverlayActivity : FragmentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        AppLockManager.isLockScreenShown.set(false) // Failsafe: Ensure it's false on destroy
+        AppLockManager.isLockScreenShown.set(false)
         AppLockManager.reportBiometricAuthFinished()
-        Log.d(TAG, "PasswordOverlayActivity onDestroy for $lockedPackageNameFromIntent")
     }
 }
 
@@ -561,9 +542,6 @@ private fun handleKeypadSpecialButtonLogic(
                         onAuthSuccess()
                     } else {
                         passwordState.value = ""
-                        if (!appLockRepository.shouldDisableHaptics()) {
-                            vibrate(context, 100)
-                        }
                         onPinIncorrect()
                     }
                 } else {
@@ -571,15 +549,8 @@ private fun handleKeypadSpecialButtonLogic(
                         val pinWasCorrectAndProcessed = attempt(passwordState.value)
                         if (!pinWasCorrectAndProcessed) {
                             passwordState.value = ""
-                            if (!appLockRepository.shouldDisableHaptics()) {
-                                vibrate(context, 100)
-                            }
                         }
                     } ?: run {
-                        Log.e(
-                            "PasswordOverlayScreen",
-                            "onPinAttempt callback is null for app unlock path."
-                        )
                         passwordState.value = ""
                     }
                 }
@@ -591,7 +562,6 @@ private fun handleKeypadSpecialButtonLogic(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun KeypadRow(
-    disableHaptics: Boolean = false,
     keys: List<String>,
     icons: List<ImageVector?> = emptyList(),
     onKeyClick: (String) -> Unit
@@ -610,9 +580,6 @@ fun KeypadRow(
             ElevatedButton(
                 onClick = {
                     scope.launch {
-                        if (!disableHaptics) {
-                            vibrate(context, 100)
-                        }
                     }
                     onKeyClick(key)
                 },

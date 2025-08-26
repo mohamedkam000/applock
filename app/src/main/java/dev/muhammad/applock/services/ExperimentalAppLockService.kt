@@ -5,7 +5,6 @@ import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.getSystemService
 import dev.muhammad.applock.core.utils.appLockRepository
@@ -28,21 +27,17 @@ class ExperimentalAppLockService : Service() {
         usageStatsManager = getSystemService()!!
 
         if (!shouldStartService(appLockRepository, this::class.java)) {
-            Log.d(TAG, "Service not needed, stopping service")
             stopSelf()
             return
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "ExperimentalAppLockService started")
         AppLockManager.resetRestartAttempts("ExperimentalAppLockService")
         appLockRepository.setActiveBackend(BackendImplementation.USAGE_STATS)
 
-        // Stop other services to ensure only one runs at a time
         stopOtherServices()
-
-        AppLockManager.isLockScreenShown.set(false) // Set to false on start to ensure correct initial state
+        AppLockManager.isLockScreenShown.set(false)
 
         timer = Timer()
         timer?.schedule(object : TimerTask() {
@@ -77,7 +72,6 @@ class ExperimentalAppLockService : Service() {
 
     override fun onDestroy() {
         timer?.cancel()
-        Log.d(TAG, "ExperimentalAppLockService destroyed")
         if (shouldStartService(appLockRepository, this::class.java)) {
             AppLockManager.startFallbackServices(this, ExperimentalAppLockService::class.java)
         }
@@ -110,11 +104,6 @@ class ExperimentalAppLockService : Service() {
         val unlockDuration = appLockRepository.getUnlockTimeDuration()
         val unlockTimestamp = AppLockManager.appUnlockTimes[packageName] ?: 0
 
-        Log.d(
-            TAG,
-            "Checking app lock for $packageName at $currentTime, unlockTimestamp: $unlockTimestamp, unlockDuration: $unlockDuration"
-        )
-
         if (unlockDuration > 0 && unlockTimestamp > 0) {
             val elapsedMinutes = (currentTime - unlockTimestamp) / (60 * 1000)
             if (elapsedMinutes < unlockDuration) {
@@ -137,8 +126,7 @@ class ExperimentalAppLockService : Service() {
             AppLockManager.isLockScreenShown.set(true) // Set to true before attempting to start
             startActivity(intent)
         } catch (e: Exception) {
-            Log.e(TAG, "Error starting PasswordOverlayActivity for package: $packageName", e)
-            AppLockManager.isLockScreenShown.set(false) // Reset on failure
+            AppLockManager.isLockScreenShown.set(false)
         }
     }
 

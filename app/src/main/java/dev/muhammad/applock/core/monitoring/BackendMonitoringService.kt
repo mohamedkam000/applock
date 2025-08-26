@@ -72,16 +72,15 @@ class BackendMonitoringService : Service() {
         when (backend) {
             BackendImplementation.USAGE_STATS -> {
                 stopService(Intent(this, ExperimentalAppLockService::class.java))
-            }
+            } else { }
         }
     }
 
     private fun startBackendService(backend: BackendImplementation) {
         when (backend) {
             BackendImplementation.USAGE_STATS -> {
-                Log.d("BackendMonitor", "Starting ExperimentalAppLockService")
                 startService(Intent(this, ExperimentalAppLockService::class.java))
-            }
+            } else { }
         }
     }
 

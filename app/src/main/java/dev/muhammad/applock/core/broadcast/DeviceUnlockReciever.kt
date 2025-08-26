@@ -10,7 +10,6 @@ class DeviceUnlockReceiver(private val onDeviceUnlocked: () -> Unit) : Broadcast
     override fun onReceive(context: Context?, intent: Intent?) {
         when (intent?.action) {
             Intent.ACTION_USER_PRESENT -> {
-                Log.d("DeviceUnlockReceiver", "Device unlocked (ACTION_USER_PRESENT)")
                 onDeviceUnlocked()
             }
 

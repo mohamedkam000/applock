@@ -5,7 +5,6 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.content.Context.KEYGUARD_SERVICE
 import android.content.Intent
-import android.util.Log
 import dev.muhammad.applock.data.repository.AppLockRepository
 import dev.muhammad.applock.data.repository.BackendImplementation
 import java.util.concurrent.ConcurrentHashMap
@@ -45,17 +44,8 @@ object AppLockManager {
 
 
     fun unlockApp(packageName: String) {
-        // get where this function is called from and log it
-        Log.d(
-            "AppLockManager",
-            "Unlocking app: $packageName from ${Thread.currentThread().stackTrace[3].className}.${Thread.currentThread().stackTrace[3].methodName}"
-        )
         temporarilyUnlockedApp = packageName
         appUnlockTimes[packageName] = System.currentTimeMillis()
-        Log.d(
-            "AppLockManager",
-            "App $packageName temporarily unlocked at ${appUnlockTimes[packageName]}"
-        )
     }
 
     fun temporarilyUnlockAppWithBiometrics(packageName: String) {
@@ -81,13 +71,8 @@ object AppLockManager {
 
     fun startFallbackServices(context: Context, failedService: Class<*>) {
         val serviceName = failedService.simpleName
-        Log.d("AppLockManager", "Starting fallback services after $serviceName failed")
 
         if (!shouldAttemptRestart(serviceName)) {
-            Log.w(
-                "AppLockManager",
-                "Skipping fallback for $serviceName - too many attempts or cooldown active"
-            )
             return
         }
 
@@ -96,7 +81,6 @@ object AppLockManager {
 
         when (failedService) {
             AppLockAccessibilityService::class.java -> {
-                Log.d("AppLockManager", "Accessibility service failed, trying fallback")
                 startServiceByBackend(context, fallbackBackend)
             }
 
@@ -150,24 +134,19 @@ object AppLockManager {
                 }
             }
         } catch (e: Exception) {
-            Log.e("AppLockManager", "Failed to start fallback service for backend: $backend", e)
         }
     }
 
     private fun stopAllServices(context: Context) {
-        Log.d("AppLockManager", "Stopping all app lock services before starting new one")
-
         try {
             context.stopService(Intent(context, ExperimentalAppLockService::class.java))
         } catch (e: Exception) {
-            Log.e("AppLockManager", "Error stopping services", e)
         }
     }
 
     fun resetRestartAttempts(serviceName: String) {
         serviceRestartAttempts.remove(serviceName)
         lastRestartTime.remove(serviceName)
-        Log.d("AppLockManager", "Reset restart attempts for $serviceName")
     }
 
 
