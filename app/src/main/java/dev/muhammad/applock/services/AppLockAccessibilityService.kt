@@ -261,6 +261,6 @@ class AppLockAccessibilityService : AccessibilityService() {
     private fun stopAllServices() {
         try {
             stopService(Intent(this, ExperimentalAppLockService::class.java))
-        } catch (e: Exception)
+        } catch (e: Exception) { }
     }
 }

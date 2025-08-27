@@ -152,7 +152,7 @@ class AppLockRepository(context: Context) {
                 Class.forName("dev.muhammad.applock.core.monitoring.BackendMonitoringService")
             )
             context.startService(intent)
-        } catch (e: Exception)
+        } catch (e: Exception) { }
     }
 
     companion object {

@@ -430,8 +430,6 @@ fun KeypadSection(
         }
     }
 
-    val disableHaptics = context.appLockRepository().shouldDisableHaptics()
-
     val onSpecialKeyClick = remember(
         passwordState,
         maxLength,
@@ -463,22 +461,18 @@ fun KeypadSection(
         modifier = Modifier
     ) {
         KeypadRow(
-            disableHaptics = disableHaptics,
             keys = listOf("1", "2", "3"),
             onKeyClick = onDigitKeyClick
         )
         KeypadRow(
-            disableHaptics = disableHaptics,
             keys = listOf("4", "5", "6"),
             onKeyClick = onDigitKeyClick
         )
         KeypadRow(
-            disableHaptics = disableHaptics,
             keys = listOf("7", "8", "9"),
             onKeyClick = onDigitKeyClick
         )
         KeypadRow(
-            disableHaptics = disableHaptics,
             keys = listOf("backspace", "0", "proceed"),
             icons = listOf(Backspace, null, Icons.AutoMirrored.Rounded.KeyboardArrowRight),
             onKeyClick = onSpecialKeyClick

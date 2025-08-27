@@ -62,7 +62,6 @@ fun SettingsScreen(
         mutableIntStateOf(appLockRepository.getUnlockTimeDuration())
     }
 
-    var showPermissionDialog by remember { mutableStateOf(false) }
     var showAccessibilityDialog by remember { mutableStateOf(false) }
 
     val biometricManager = BiometricManager.from(context)
@@ -78,15 +77,6 @@ fun SettingsScreen(
                 unlockTimeDuration = newDuration
                 appLockRepository.setUnlockTimeDuration(newDuration)
                 showUnlockTimeDialog = false
-            }
-        )
-    }
-
-    if (showPermissionDialog) {
-        PermissionRequiredDialog(
-            onDismiss = { showPermissionDialog = false },
-            onConfirm = {
-                showPermissionDialog = false
             }
         )
     }

@@ -32,7 +32,7 @@ class BackendMonitoringService : Service() {
             override fun run() {
                 try {
                     checkAndSwitchBackend()
-                } catch (e: Exception)
+                } catch (e: Exception) { }
 
                 handler.postDelayed(this, monitoringInterval)
             }
