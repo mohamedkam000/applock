@@ -59,15 +59,11 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.app.lock.R
-import com.app.lock.core.broadcast.DeviceAdmin
 import com.app.lock.core.navigation.Screen
 import com.app.lock.core.utils.appLockRepository
 import com.app.lock.core.utils.hasUsagePermission
-import com.app.lock.core.utils.isAccessibilityServiceEnabled
-import com.app.lock.core.utils.openAccessibilitySettings
+
 import com.app.lock.data.repository.BackendImplementation
-import com.app.lock.ui.components.AccessibilityServiceGuideDialog
-import com.app.lock.ui.components.AntiUninstallAccessibilityPermissionDialog
 import com.app.lock.ui.components.UsageStatsPermission
 
 @OptIn(
@@ -86,12 +82,7 @@ fun MainScreen(
     val filteredApps by mainViewModel.filteredApps.collectAsState()
 
 
-    // Check if accessibility service is enabled
-    var showAccessibilityDialog by remember { mutableStateOf(false) }
     var showUsageStatsDialog by remember { mutableStateOf(false) }
-    var showAntiUninstallAccessibilityDialog by remember { mutableStateOf(false) }
-    var showAntiUninstallDeviceAdminDialog by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         val appLockRepository = context.appLockRepository()
 
@@ -101,22 +92,7 @@ fun MainScreen(
             context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         val component = ComponentName(context, DeviceAdmin::class.java)
 
-        if (appLockRepository.isAntiUninstallEnabled()) {
-            Log.d("MainScreen", "Anti-uninstall is enabled")
-            if (!context.isAccessibilityServiceEnabled()) {
-                showAntiUninstallAccessibilityDialog = true
-            } else if (!dpm.isAdminActive(component)) {
-                showAntiUninstallDeviceAdminDialog = true
-            }
-        }
-
         when (selectedBackend) {
-            BackendImplementation.ACCESSIBILITY -> {
-                if (!context.isAccessibilityServiceEnabled()) {
-                    showAccessibilityDialog = true
-                }
-            }
-
             BackendImplementation.USAGE_STATS -> {
                 if (!context.hasUsagePermission()) {
                     showUsageStatsDialog = true
@@ -125,20 +101,7 @@ fun MainScreen(
         }
     }
 
-    // Show accessibility service guide dialog if needed
-    if (showAccessibilityDialog && !showAntiUninstallAccessibilityDialog && !showAntiUninstallDeviceAdminDialog && !context.isAccessibilityServiceEnabled()) {
-        AccessibilityServiceGuideDialog(
-            onOpenSettings = {
-                openAccessibilitySettings(context)
-                showAccessibilityDialog = false
-            },
-            onDismiss = {
-                showAccessibilityDialog = false
-            }
-        )
-    }
-
-    if (showUsageStatsDialog && !showAntiUninstallAccessibilityDialog && !showAntiUninstallDeviceAdminDialog && !context.hasUsagePermission()) {
+    if (showUsageStatsDialog && !context.hasUsagePermission()) {
         UsageStatsPermission(
             onOpenSettings = {
                 context.startActivity(Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS))
@@ -146,38 +109,6 @@ fun MainScreen(
             },
             onDismiss = {
                 showUsageStatsDialog = false
-            }
-        )
-    }
-
-    if (showAntiUninstallAccessibilityDialog) {
-        AntiUninstallAccessibilityPermissionDialog(
-            onOpenSettings = {
-                openAccessibilitySettings(context)
-                showAntiUninstallAccessibilityDialog = false
-            },
-            onDismiss = {
-                showAntiUninstallAccessibilityDialog = false
-            }
-        )
-    }
-
-    if (showAntiUninstallDeviceAdminDialog) {
-        AntiUninstallAccessibilityPermissionDialog(
-            onOpenSettings = {
-                val component = ComponentName(context, DeviceAdmin::class.java)
-                val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-                    putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, component)
-                    putExtra(
-                        DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                        "App Lock requires Device Admin permission to prevent removal."
-                    )
-                }
-                context.startActivity(intent)
-                showAntiUninstallDeviceAdminDialog = false
-            },
-            onDismiss = {
-                showAntiUninstallDeviceAdminDialog = false
             }
         )
     }
