@@ -327,10 +327,10 @@ fun AppIntroScreen(navController: NavController) {
                     NotificationManagerCompat.from(context).areNotificationsEnabled()
             }
 
-            val methodPermissionGranted = when (selectedMethod) {
-                AppUsageMethod.USAGE_STATS -> context.hasUsagePermission()
-                else -> false
-            }
+//             val methodPermissionGranted = when (selectedMethod) {
+//                 AppUsageMethod.USAGE_STATS -> context.hasUsagePermission()
+//                 else -> false
+//             }
 
 //             val allPermissionsGranted = if (selectedMethod == AppUsageMethod.ACCESSIBILITY) {
 //                 overlayPermissionGranted && notificationPermissionGranted && methodPermissionGranted
@@ -345,7 +345,7 @@ fun AppIntroScreen(navController: NavController) {
 //                     Toast.LENGTH_SHORT
 //                 ).show()
 //             }
-            allPermissionsGranted
+//            allPermissionsGranted
         }
     )
 
