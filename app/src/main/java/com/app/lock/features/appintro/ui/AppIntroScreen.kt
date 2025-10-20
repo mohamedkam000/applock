@@ -140,13 +140,13 @@ fun AppIntroScreen(navController: NavController) {
     val context = LocalContext.current
     val activity = context as? ComponentActivity
 
-    var selectedMethod by remember { mutableStateOf(AppUsageMethod.ACCESSIBILITY) }
+//    var selectedMethod by remember { mutableStateOf(AppUsageMethod.ACCESSIBILITY) }
     var overlayPermissionGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     var notificationPermissionGranted by remember {
         mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled())
     }
     var usageStatsPermissionGranted by remember { mutableStateOf(context.hasUsagePermission()) }
-    var accessibilityServiceEnabled by remember { mutableStateOf(context.isAccessibilityServiceEnabled()) }
+//    var accessibilityServiceEnabled by remember { mutableStateOf(context.isAccessibilityServiceEnabled()) }
 
     val requestPermissionLauncher =
         if (activity != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -328,7 +328,6 @@ fun AppIntroScreen(navController: NavController) {
             }
 
             val methodPermissionGranted = when (selectedMethod) {
-                AppUsageMethod.ACCESSIBILITY -> context.isAccessibilityServiceEnabled()
                 AppUsageMethod.USAGE_STATS -> context.hasUsagePermission()
             }
 

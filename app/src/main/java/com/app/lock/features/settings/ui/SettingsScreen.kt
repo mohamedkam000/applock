@@ -68,7 +68,7 @@ import com.app.lock.core.navigation.Screen
 // import com.app.lock.core.utils.hasUsagePermission
 // import com.app.lock.core.utils.isAccessibilityServiceEnabled
 // import com.app.lock.core.utils.openAccessibilitySettings
-// import com.app.lock.data.repository.AppLockRepository
+import com.app.lock.data.repository.AppLockRepository
 // import com.app.lock.data.repository.BackendImplementation
 //import com.app.lock.services.ExperimentalAppLockService
 //import com.app.lock.ui.icons.Accessibility
