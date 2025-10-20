@@ -59,13 +59,13 @@ import dev.muhammad.appintro.IntroPage
 import com.app.lock.core.navigation.Screen
 import com.app.lock.core.utils.appLockRepository
 import com.app.lock.core.utils.hasUsagePermission
-import com.app.lock.core.utils.isAccessibilityServiceEnabled
+//import com.app.lock.core.utils.isAccessibilityServiceEnabled
 import com.app.lock.core.utils.launchBatterySettings
 import com.app.lock.data.repository.BackendImplementation
 import com.app.lock.features.appintro.domain.AppIntroManager
 import com.app.lock.services.ExperimentalAppLockService
-import com.app.lock.ui.icons.Accessibility
-import com.app.lock.ui.icons.BatterySaver
+//import com.app.lock.ui.icons.Accessibility
+//import com.app.lock.ui.icons.BatterySaver
 import com.app.lock.ui.icons.Display
 
 enum class AppUsageMethod {
@@ -169,7 +169,7 @@ fun AppIntroScreen(navController: NavController) {
             notificationPermissionGranted =
                 NotificationManagerCompat.from(context).areNotificationsEnabled()
         }
-        accessibilityServiceEnabled = context.isAccessibilityServiceEnabled()
+//        accessibilityServiceEnabled = context.isAccessibilityServiceEnabled()
     }
 
     val onFinishCallback = {
@@ -329,26 +329,27 @@ fun AppIntroScreen(navController: NavController) {
 
             val methodPermissionGranted = when (selectedMethod) {
                 AppUsageMethod.USAGE_STATS -> context.hasUsagePermission()
+                else -> false
             }
 
-            val allPermissionsGranted = if (selectedMethod == AppUsageMethod.ACCESSIBILITY) {
-                overlayPermissionGranted && notificationPermissionGranted && methodPermissionGranted
-            } else {
-                overlayPermissionGranted && notificationPermissionGranted && methodPermissionGranted
-            }
+//             val allPermissionsGranted = if (selectedMethod == AppUsageMethod.ACCESSIBILITY) {
+//                 overlayPermissionGranted && notificationPermissionGranted && methodPermissionGranted
+//             } else {
+//                 overlayPermissionGranted && notificationPermissionGranted && methodPermissionGranted
+//             }
 
-            if (!allPermissionsGranted) {
-                Toast.makeText(
-                    context,
-                    "All permissions are required to proceed.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+//             if (!allPermissionsGranted) {
+//                 Toast.makeText(
+//                     context,
+//                     "All permissions are required to proceed.",
+//                     Toast.LENGTH_SHORT
+//                 ).show()
+//             }
             allPermissionsGranted
         }
     )
 
-    val allPages = basicPages + methodSelectionPage + methodSpecificPages + finalPage
+    val allPages = basicPages + methodSpecificPages + finalPage
 
     AppIntro(
         pages = allPages,
