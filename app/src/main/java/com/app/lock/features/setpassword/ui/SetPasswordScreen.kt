@@ -137,7 +137,7 @@ fun SetPasswordScreen(
                 title = {
                     Text(
                         text = when {
-                            isFirstTimeSetup -> "Welcome to App Lock"
+//                            isFirstTimeSetup -> "Welcome to App Lock"
                             isVerifyOldPasswordMode -> "Enter your Current PIN"
                             isConfirmationMode -> "Confirm your PIN"
                             else -> "Set a new PIN"
@@ -355,11 +355,10 @@ fun SetPasswordScreen(
                                             appLockRepository?.setPassword(passwordState)
                                             Toast.makeText(
                                                 context,
-                                                "Password set successfully",
+                                                "All set",
                                                 Toast.LENGTH_SHORT
                                             ).show()
 
-                                            // Navigate to Main screen after setting password
                                             navController.navigate(Screen.Main.route) {
                                                 popUpTo(Screen.SetPassword.route) {
                                                     inclusive = true

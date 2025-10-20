@@ -69,7 +69,7 @@ import com.app.lock.ui.icons.BatterySaver
 import com.app.lock.ui.icons.Display
 
 enum class AppUsageMethod {
-    ACCESSIBILITY,
+//    ACCESSIBILITY,
     USAGE_STATS
 }
 
@@ -211,152 +211,108 @@ fun AppIntroScreen(navController: NavController) {
                     true
                 }
             }
-        ),
-        IntroPage(
-            title = "Disable Battery Optimisation",
-            description = "This is needed to make sure App Lock is monitoring your apps in real-time and won't hesitate to protect them.",
-            icon = BatterySaver,
-            backgroundColor = Color(0xFF36CA5F),
-            contentColor = Color.White,
-            onNext = {
-                val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-                val isIgnoringOptimizations =
-                    powerManager.isIgnoringBatteryOptimizations(context.packageName)
-                if (!isIgnoringOptimizations) {
-                    launchBatterySettings(context)
-                    return@IntroPage false
-                }
-                return@IntroPage true
-            }
-        ),
-        IntroPage(
-            title = "Notification Permission",
-            description = "This permission is needed just to make sure the system won't terminate the app.",
-            icon = Icons.Default.Notifications,
-            backgroundColor = Color(0xFFFFA700),
-            contentColor = Color.White,
-            onNext = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    val isGrantedCurrently =
-                        NotificationManagerCompat.from(context).areNotificationsEnabled()
-                    notificationPermissionGranted = isGrantedCurrently
-                    if (!isGrantedCurrently) {
-                        requestPermissionLauncher?.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                        return@IntroPage false
-                    } else {
-                        return@IntroPage true
-                    }
-                } else {
-                    true
-                }
-            }
         )
+//         IntroPage(
+//             title = "Notification Permission",
+//             description = "This permission is needed just to make sure the system won't terminate the app.",
+//             icon = Icons.Default.Notifications,
+//             backgroundColor = Color(0xFFFFA700),
+//             contentColor = Color.White,
+//             onNext = {
+//                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                     val isGrantedCurrently =
+//                         NotificationManagerCompat.from(context).areNotificationsEnabled()
+//                     notificationPermissionGranted = isGrantedCurrently
+//                     if (!isGrantedCurrently) {
+//                         requestPermissionLauncher?.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+//                         return@IntroPage false
+//                     } else {
+//                         return@IntroPage true
+//                     }
+//                 } else {
+//                     true
+//                 }
+//             }
+//         )
     )
 
-    val methodSelectionPage = IntroPage(
-        title = "Choose App Detection Method",
-        description = "Select how you want App Lock to detect when protected apps are launched.",
-        icon = Icons.Default.Lock,
-        backgroundColor = Color(0xFF6B46C1),
+//     val methodSelectionPage = IntroPage(
+//         title = "Choose App Detection Method",
+//         description = "Select how you want App Lock to detect when protected apps are launched.",
+//         icon = Icons.Default.Lock,
+//         backgroundColor = Color(0xFF6B46C1),
+//         contentColor = Color.White,
+//         customContent = {
+//             Column(
+//                 modifier = Modifier
+//                     .fillMaxSize()
+//                     .background(Color(0xFF6B46C1))
+//                     .padding(16.dp),
+//                 horizontalAlignment = Alignment.CenterHorizontally,
+//                 verticalArrangement = Arrangement.Center
+//             ) {
+//                 Text(
+//                     text = "App Detection Method",
+//                     fontSize = 20.sp,
+//                     fontWeight = FontWeight.Bold,
+//                     color = Color.White,
+//                     textAlign = TextAlign.Center
+//                 )
+//                 Spacer(modifier = Modifier.height(12.dp))
+//                 Text(
+//                     text = "Select how you want App Lock to detect when protected apps are launched. Each method has its own advantages, disadvantages, and requirements.",
+//                     fontSize = 14.sp,
+//                     lineHeight = 19.sp,
+//                     color = Color.White.copy(alpha = 0.9f),
+//                     textAlign = TextAlign.Center
+//                 )
+//                 Spacer(modifier = Modifier.height(12.dp))
+// 
+//                 MethodSelectionCard(
+//                     title = "Accessibility Service",
+//                     description = "Standard method that works on all devices. Requires the accessibility permission.",
+//                     icon = Accessibility,
+//                     isSelected = selectedMethod == AppUsageMethod.ACCESSIBILITY,
+//                     onClick = { selectedMethod = AppUsageMethod.ACCESSIBILITY },
+//                 )
+// 
+//                 MethodSelectionCard(
+//                     title = "Usage Stats",
+//                     description = "Experimental method utilizing system usage statistics. Works better on newer devices.",
+//                     icon = Icons.Default.QueryStats,
+//                     isSelected = selectedMethod == AppUsageMethod.USAGE_STATS,
+//                     onClick = { selectedMethod = AppUsageMethod.USAGE_STATS },
+//                 )
+// 
+//                 Spacer(modifier = Modifier.height(16.dp))
+//             }
+//         },
+//         onNext = { true }
+//     )
+
+    val methodSpecificPages = IntroPage(
+        title = "Usage Stats Permission",
+        description = "This permission is required to detect when locked apps are launched.\n\nIf you get the message \"Restricted Setting\", go to Settings > Apps > App Lock > Upper Right menu, and press \"Allow restricted settings\".\n\nTap 'Next' to enable it.",
+        icon = Icons.Default.QueryStats,
+        backgroundColor = Color(0xFFB453A4),
         contentColor = Color.White,
-        customContent = {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF6B46C1))
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "App Detection Method",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
+        onNext = {
+            usageStatsPermissionGranted = context.hasUsagePermission()
+            if (!usageStatsPermissionGranted) {
+                val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+                false
+            } else {
+                context.appLockRepository()
+                    .setBackendImplementation(BackendImplementation.USAGE_STATS)
+                context.startService(
+                    Intent(context, ExperimentalAppLockService::class.java)
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Select how you want App Lock to detect when protected apps are launched. Each method has its own advantages, disadvantages, and requirements.",
-                    fontSize = 14.sp,
-                    lineHeight = 19.sp,
-                    color = Color.White.copy(alpha = 0.9f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-
-                MethodSelectionCard(
-                    title = "Accessibility Service",
-                    description = "Standard method that works on all devices. Requires the accessibility permission.",
-                    icon = Accessibility,
-                    isSelected = selectedMethod == AppUsageMethod.ACCESSIBILITY,
-                    onClick = { selectedMethod = AppUsageMethod.ACCESSIBILITY },
-                )
-
-                MethodSelectionCard(
-                    title = "Usage Stats",
-                    description = "Experimental method utilizing system usage statistics. Works better on newer devices.",
-                    icon = Icons.Default.QueryStats,
-                    isSelected = selectedMethod == AppUsageMethod.USAGE_STATS,
-                    onClick = { selectedMethod = AppUsageMethod.USAGE_STATS },
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
+                true
             }
-        },
-        onNext = { true }
+        }
     )
-
-    val methodSpecificPages = when (selectedMethod) {
-        AppUsageMethod.ACCESSIBILITY -> listOf(
-            IntroPage(
-                title = "Accessibility Service",
-                description = "Accessibility service is required for App Lock to function properly.\n\nIf you get the message \"Restricted Setting\", go to Settings > Apps > App Lock > Upper Right menu, and press \"Allow restricted settings\".\n\nTap 'Next' to enable it.",
-                icon = Accessibility,
-                backgroundColor = Color(0xFFF1550E),
-                contentColor = Color.White,
-                onNext = {
-                    accessibilityServiceEnabled = context.isAccessibilityServiceEnabled()
-                    if (!accessibilityServiceEnabled) {
-                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(intent)
-                        false
-                    } else {
-                        context.appLockRepository()
-                            .setBackendImplementation(BackendImplementation.ACCESSIBILITY)
-                        true
-                    }
-                }
-            )
-        )
-
-        AppUsageMethod.USAGE_STATS -> listOf(
-            IntroPage(
-                title = "Usage Stats Permission",
-                description = "This permission is required to detect when locked apps are launched.\n\nIf you get the message \"Restricted Setting\", go to Settings > Apps > App Lock > Upper Right menu, and press \"Allow restricted settings\".\n\nTap 'Next' to enable it.",
-                icon = Icons.Default.QueryStats,
-                backgroundColor = Color(0xFFB453A4),
-                contentColor = Color.White,
-                onNext = {
-                    usageStatsPermissionGranted = context.hasUsagePermission()
-                    if (!usageStatsPermissionGranted) {
-                        val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(intent)
-                        false
-                    } else {
-                        context.appLockRepository()
-                            .setBackendImplementation(BackendImplementation.USAGE_STATS)
-                        context.startService(
-                            Intent(context, ExperimentalAppLockService::class.java)
-                        )
-                        true
-                    }
-                }
-            )
-        )
-    }
 
     val finalPage = IntroPage(
         title = "Perfect Privacy",
@@ -376,7 +332,6 @@ fun AppIntroScreen(navController: NavController) {
                 AppUsageMethod.USAGE_STATS -> context.hasUsagePermission()
             }
 
-            // Only require all permissions if accessibility is selected
             val allPermissionsGranted = if (selectedMethod == AppUsageMethod.ACCESSIBILITY) {
                 overlayPermissionGranted && notificationPermissionGranted && methodPermissionGranted
             } else {
