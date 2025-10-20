@@ -157,7 +157,6 @@ object AppLockManager {
             stopAllServices(context)
 
             when (backend) {
-
                 BackendImplementation.USAGE_STATS -> {
                     Log.d("AppLockManager", "Starting Experimental service as fallback")
                     context.startService(Intent(context, ExperimentalAppLockService::class.java))
@@ -180,7 +179,6 @@ object AppLockManager {
 
         try {
             context.stopService(Intent(context, ExperimentalAppLockService::class.java))
-            context.stopService(Intent(context, ShizukuAppLockService::class.java))
         } catch (e: Exception) {
             Log.e("AppLockManager", "Error stopping services", e)
         }

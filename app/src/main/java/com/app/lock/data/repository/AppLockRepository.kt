@@ -12,9 +12,6 @@ import com.app.lock.core.utils.hasUsagePermission
 import com.app.lock.core.utils.isAccessibilityServiceEnabled
 import com.app.lock.services.AppLockAccessibilityService
 import com.app.lock.services.ExperimentalAppLockService
-import com.app.lock.services.ShizukuAppLockService
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuProvider
 
 class AppLockRepository(context: Context) {
 
@@ -155,29 +152,7 @@ class AppLockRepository(context: Context) {
         return when (backend) {
             BackendImplementation.ACCESSIBILITY -> context.isAccessibilityServiceEnabled()
             BackendImplementation.USAGE_STATS -> context.hasUsagePermission()
-            BackendImplementation.SHIZUKU -> {
-                try {
-                    if (Shizuku.isPreV11() || Shizuku.getVersion() < 11) {
-                        checkSelfPermission(
-                            context,
-                            ShizukuProvider.PERMISSION
-                        ) == PermissionChecker.PERMISSION_GRANTED
-                    } else {
-                        Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-                    }
-                } catch (e: Exception) {
-                    false
-                }
-            }
         }
-    }
-
-    fun setShizukuExperimentalEnabled(enabled: Boolean) {
-        settingsPrefs.edit { putBoolean(KEY_SHIZUKU_EXPERIMENTAL, enabled) }
-    }
-
-    fun isShizukuExperimentalEnabled(): Boolean {
-        return settingsPrefs.getBoolean(KEY_SHIZUKU_EXPERIMENTAL, true)
     }
 
     fun validateAndSwitchBackend(context: Context): BackendImplementation {
@@ -240,8 +215,6 @@ class AppLockRepository(context: Context) {
         private const val KEY_BACKEND_IMPLEMENTATION = "backend_implementation"
         private const val KEY_FALLBACK_BACKEND = "fallback_backend"
         private const val KEY_ACTIVE_BACKEND = "active_backend"
-        private const val KEY_SHIZUKU_EXPERIMENTAL = "shizuku_experimental"
-
 
         fun shouldStartService(rep: AppLockRepository, serviceClass: Class<*>): Boolean {
             // check if some other service is already running, BUT this one should take precedence, and take over
@@ -257,7 +230,6 @@ class AppLockRepository(context: Context) {
                 val backendClass = when (serviceClass) {
                     AppLockAccessibilityService::class.java -> BackendImplementation.ACCESSIBILITY
                     ExperimentalAppLockService::class.java -> BackendImplementation.USAGE_STATS
-                    ShizukuAppLockService::class.java -> BackendImplementation.SHIZUKU
                     else -> return false // Unknown service class, do not start
                 }
                 if (backendClass == rep.getBackendImplementation()) {
@@ -280,6 +252,5 @@ class AppLockRepository(context: Context) {
 
 enum class BackendImplementation {
     ACCESSIBILITY,
-    USAGE_STATS,
-    SHIZUKU
+    USAGE_STATS
 }

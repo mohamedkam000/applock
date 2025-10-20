@@ -346,11 +346,6 @@ class AppLockAccessibilityService : AccessibilityService() {
 
         // Start only the primary backend service
         when (appLockRepository.getBackendImplementation()) {
-            BackendImplementation.SHIZUKU -> {
-                Log.d(TAG, "Starting Shizuku service as primary backend")
-                startService(Intent(this, ShizukuAppLockService::class.java))
-            }
-
             BackendImplementation.USAGE_STATS -> {
                 Log.d(TAG, "Starting Experimental service as primary backend")
                 startService(Intent(this, ExperimentalAppLockService::class.java))
@@ -370,7 +365,6 @@ class AppLockAccessibilityService : AccessibilityService() {
 
         try {
             stopService(Intent(this, ExperimentalAppLockService::class.java))
-            stopService(Intent(this, ShizukuAppLockService::class.java))
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping services", e)
         }
