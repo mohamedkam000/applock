@@ -74,6 +74,12 @@ class ExperimentalAppLockService : Service() {
 
     private fun stopOtherServices() {
         Log.d(TAG, "Stopping other app lock services")
+
+        try {
+            stopService(Intent(this, ShizukuAppLockService::class.java))
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping other services", e)
+        }
     }
 
     override fun onDestroy() {

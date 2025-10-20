@@ -10,6 +10,7 @@ import android.util.Log
 import com.app.lock.core.utils.appLockRepository
 import com.app.lock.data.repository.BackendImplementation
 import com.app.lock.services.ExperimentalAppLockService
+import com.app.lock.services.ShizukuAppLockService
 
 class BackendMonitoringService : Service() {
 
@@ -84,7 +85,12 @@ class BackendMonitoringService : Service() {
 
     private fun stopAllServices() {
         Log.d("BackendMonitor", "Stopping all app lock services")
+
+        // Stop all possible services
         stopService(Intent(this, ExperimentalAppLockService::class.java))
+        stopService(Intent(this, ShizukuAppLockService::class.java))
+
+        // Note: Accessibility service cannot be stopped programmatically
         Log.d("BackendMonitor", "All stoppable services have been stopped")
     }
 
@@ -93,6 +99,11 @@ class BackendMonitoringService : Service() {
             BackendImplementation.USAGE_STATS -> {
                 Log.d("BackendMonitor", "Stopping ExperimentalAppLockService")
                 stopService(Intent(this, ExperimentalAppLockService::class.java))
+            }
+
+            BackendImplementation.SHIZUKU -> {
+                Log.d("BackendMonitor", "Stopping ShizukuAppLockService")
+                stopService(Intent(this, ShizukuAppLockService::class.java))
             }
 
             BackendImplementation.ACCESSIBILITY -> {
@@ -107,6 +118,11 @@ class BackendMonitoringService : Service() {
             BackendImplementation.USAGE_STATS -> {
                 Log.d("BackendMonitor", "Starting ExperimentalAppLockService")
                 startService(Intent(this, ExperimentalAppLockService::class.java))
+            }
+
+            BackendImplementation.SHIZUKU -> {
+                Log.d("BackendMonitor", "Starting ShizukuAppLockService")
+                startService(Intent(this, ShizukuAppLockService::class.java))
             }
 
             BackendImplementation.ACCESSIBILITY -> {
