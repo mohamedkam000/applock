@@ -322,10 +322,10 @@ fun AppIntroScreen(navController: NavController) {
         contentColor = Color.White,
         onNext = {
             overlayPermissionGranted = Settings.canDrawOverlays(context)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                notificationPermissionGranted =
-                    NotificationManagerCompat.from(context).areNotificationsEnabled()
-            }
+//             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                 notificationPermissionGranted =
+//                     NotificationManagerCompat.from(context).areNotificationsEnabled()
+//             }
 
 //             val methodPermissionGranted = when (selectedMethod) {
 //                 AppUsageMethod.USAGE_STATS -> context.hasUsagePermission()
