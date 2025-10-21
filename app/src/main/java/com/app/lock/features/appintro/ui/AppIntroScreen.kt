@@ -320,8 +320,8 @@ fun AppIntroScreen(navController: NavController) {
         icon = Icons.Default.Lock,
         backgroundColor = Color(0xFF0047AB),
         contentColor = Color.White,
-        onNext = {
-            overlayPermissionGranted = Settings.canDrawOverlays(context)
+//        onNext = {
+//            overlayPermissionGranted = Settings.canDrawOverlays(context)
 //             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 //                 notificationPermissionGranted =
 //                     NotificationManagerCompat.from(context).areNotificationsEnabled()
@@ -346,7 +346,7 @@ fun AppIntroScreen(navController: NavController) {
 //                 ).show()
 //             }
 //            allPermissionsGranted
-        }
+//        }
     )
 
     val allPages = basicPages + methodSpecificPages + finalPage
