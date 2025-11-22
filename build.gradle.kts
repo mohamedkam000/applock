@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.android) apply false
-    alias(libs.plugins.kotlin.compose) apply false
-    alias(libs.plugins.android.library) apply false
+    id("com.android.application") version "9.0.0-beta01" apply false
+    id("org.jetbrains.kotlin.android") version "2.3.0-RC" apply false
+    id("com.android.library") version "9.0.0-beta01" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.0-RC" apply false
 }
