@@ -54,8 +54,8 @@ import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
 import androidx.core.net.toUri
 import androidx.navigation.NavController
-import dev.muhammad.appintro.AppIntro
-import dev.muhammad.appintro.IntroPage
+import com.app.intro.AppIntro
+import com.app.intro.IntroPage
 import com.app.lock.core.navigation.Screen
 import com.app.lock.core.utils.appLockRepository
 import com.app.lock.core.utils.hasUsagePermission
