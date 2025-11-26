@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="applock.jpg" alt="App Lock" width="600" />
+  <img src="applock.png" alt="App Lock" width="600" />
 </div>
 
 <h1 align="center">App Lock</h1>
