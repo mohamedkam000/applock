@@ -1,4 +1,4 @@
-package dev.muhammad.appintro
+package com.app.intro
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize

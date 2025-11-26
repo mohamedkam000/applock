@@ -1,4 +1,4 @@
-package dev.muhammad.appintro
+package com.app.intro
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState

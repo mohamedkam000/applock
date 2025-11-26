@@ -1,4 +1,4 @@
-package dev.muhammad.appintro
+package com.app.intro
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color

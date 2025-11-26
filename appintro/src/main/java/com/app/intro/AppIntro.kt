@@ -1,4 +1,4 @@
-package dev.muhammad.appintro
+package com.app.intro
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
