@@ -1,4 +1,4 @@
-package com.app.intro
+package com.app.lock.intro
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize

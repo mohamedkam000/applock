@@ -1,4 +1,4 @@
-package com.app.intro
+package com.app.lock.intro
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility

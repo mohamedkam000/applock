@@ -1,4 +1,4 @@
-package com.app.intro
+package com.app.lock.intro
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
