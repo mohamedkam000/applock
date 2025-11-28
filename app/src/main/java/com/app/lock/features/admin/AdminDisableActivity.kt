@@ -105,7 +105,7 @@ fun AdminDisableScreen(
     ) {
         val passwordState = remember { mutableStateOf("") }
         val showError = remember { mutableStateOf(false) }
-        val maxLength = 6
+        val maxLength = 4
 
         Column(
             modifier = Modifier

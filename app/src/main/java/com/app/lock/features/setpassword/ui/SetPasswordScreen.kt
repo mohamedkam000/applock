@@ -83,7 +83,7 @@ fun SetPasswordScreen(
     var showMismatchError by remember { mutableStateOf(false) }
     var showLengthError by remember { mutableStateOf(false) }
     var showInvalidOldPasswordError by remember { mutableStateOf(false) }
-    val maxLength = 6
+    val maxLength = 4
 
     val context = LocalContext.current
     val activity = LocalActivity.current as? ComponentActivity
@@ -186,7 +186,7 @@ fun SetPasswordScreen(
             }
             if (showLengthError) {
                 Text(
-                    text = "PIN must be 6 digits",
+                    text = "PIN must be 4 digits",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(8.dp)
