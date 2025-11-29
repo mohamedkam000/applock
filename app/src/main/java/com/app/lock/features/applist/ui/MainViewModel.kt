@@ -75,9 +75,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 _allApps.value = emptyList()
-            }*/ finally {
+            } finally {
                 _isLoading.value = false
-            }
+            }*/
         }
     }
 
