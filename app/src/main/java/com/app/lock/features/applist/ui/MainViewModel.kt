@@ -69,7 +69,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _isLoading.value = true
             try {
                 val apps = withContext(Dispatchers.IO) {
-                    appSearchManager.loadApps()
+//                    appSearchManager.loadApps()
                 }
                 _allApps.value = apps
             } catch (e: Exception) {
