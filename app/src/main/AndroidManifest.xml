@@ -16,7 +16,6 @@
         android:icon="@mipmap/ic_launcher"
         android:label="App Lock"
         android:persistent="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.AppLock">
 
         <activity
