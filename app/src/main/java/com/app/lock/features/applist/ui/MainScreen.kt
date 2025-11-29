@@ -81,7 +81,7 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
 
-    val searchQuery by mainViewModel.searchQuery.collectAsState()
+//    val searchQuery by mainViewModel.searchQuery.collectAsState()
     val isLoading by mainViewModel.isLoading.collectAsState()
     val filteredApps by mainViewModel.filteredApps.collectAsState()
 
