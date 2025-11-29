@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 
 @OptIn(FlowPreview::class)
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private val appSearchManager = AppSearchManager(application)
+//    private val appSearchManager = AppSearchManager(application)
     private val appLockRepository = AppLockRepository(application)
 
     private val _isLoading = MutableStateFlow(true)
