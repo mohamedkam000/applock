@@ -5,7 +5,7 @@ import android.content.pm.ApplicationInfo
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.lock.data.repository.AppLockRepository
-//import com.app.lock.features.applist.domain.AppSearchManager
+import com.app.lock.features.applist.domain.AppSearchManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 
 @OptIn(FlowPreview::class)
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-//    private val appSearchManager = AppSearchManager(application)
+    private val appSearchManager = AppSearchManager(application)
     private val appLockRepository = AppLockRepository(application)
 
     private val _isLoading = MutableStateFlow(true)
@@ -28,8 +28,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _allApps = MutableStateFlow<List<ApplicationInfo>>(emptyList())
 
-/*    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()*/
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _lockedApps = MutableStateFlow<Set<String>>(emptySet())
 
@@ -55,19 +55,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadAllApplications()
         loadLockedApps()
 
-/*        viewModelScope.launch {
+        viewModelScope.launch {
             _searchQuery
                 .debounce(100L)
                 .collect { query ->
                     _debouncedQuery.value = query
                 }
-        }*/
+        }
     }
 
     private fun loadAllApplications() {
         viewModelScope.launch {
             _isLoading.value = true
-/*            try {
+            try {
                 val apps = withContext(Dispatchers.IO) {
                     appSearchManager.loadApps()
                 }
@@ -77,7 +77,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _allApps.value = emptyList()
             } finally {
                 _isLoading.value = false
-            }*/
+            }
         }
     }
 
@@ -85,9 +85,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _lockedApps.value = appLockRepository.getLockedApps()
     }
 
-/*    fun onSearchQueryChanged(query: String) {
+    fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
-    }*/
+    }
 
     fun toggleAppLock(appInfo: ApplicationInfo, shouldLock: Boolean) {
         val packageName = appInfo.packageName

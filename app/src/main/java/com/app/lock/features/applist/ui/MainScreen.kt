@@ -81,12 +81,12 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
 
-//    val searchQuery by mainViewModel.searchQuery.collectAsState()
+    val searchQuery by mainViewModel.searchQuery.collectAsState()
     val isLoading by mainViewModel.isLoading.collectAsState()
     val filteredApps by mainViewModel.filteredApps.collectAsState()
 
 
-    // Check if accessibility service is enabled
+
     var showAccessibilityDialog by remember { mutableStateOf(false) }
     var showUsageStatsDialog by remember { mutableStateOf(false) }
     var showAntiUninstallAccessibilityDialog by remember { mutableStateOf(false) }
@@ -125,7 +125,6 @@ fun MainScreen(
         }
     }
 
-    // Show accessibility service guide dialog if needed
     if (showAccessibilityDialog && !showAntiUninstallAccessibilityDialog && !showAntiUninstallDeviceAdminDialog && !context.isAccessibilityServiceEnabled()) {
         AccessibilityServiceGuideDialog(
             onOpenSettings = {
