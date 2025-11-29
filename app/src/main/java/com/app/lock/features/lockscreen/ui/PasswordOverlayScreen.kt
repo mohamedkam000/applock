@@ -63,7 +63,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.app.lock.core.ui.shapes
 import com.app.lock.core.utils.appLockRepository
-import com.app.lock.core.utils.vibrate
 import com.app.lock.data.repository.AppLockRepository
 import com.app.lock.services.AppLockAccessibilityService
 import com.app.lock.services.AppLockManager
@@ -561,9 +560,6 @@ private fun handleKeypadSpecialButtonLogic(
                         onAuthSuccess()
                     } else {
                         passwordState.value = ""
-                        if (!appLockRepository.shouldDisableHaptics()) {
-                            vibrate(context, 100)
-                        }
                         onPinIncorrect()
                     }
                 } else {
@@ -571,9 +567,6 @@ private fun handleKeypadSpecialButtonLogic(
                         val pinWasCorrectAndProcessed = attempt(passwordState.value)
                         if (!pinWasCorrectAndProcessed) {
                             passwordState.value = ""
-                            if (!appLockRepository.shouldDisableHaptics()) {
-                                vibrate(context, 100)
-                            }
                         }
                     } ?: run {
                         Log.e(
@@ -610,9 +603,6 @@ fun KeypadRow(
             ElevatedButton(
                 onClick = {
                     scope.launch {
-                        if (!disableHaptics) {
-                            vibrate(context, 100)
-                        }
                     }
                     onKeyClick(key)
                 },
