@@ -67,15 +67,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun loadAllApplications() {
         viewModelScope.launch {
             _isLoading.value = true
-            try {
+/*            try {
                 val apps = withContext(Dispatchers.IO) {
-//                    appSearchManager.loadApps()
+                    appSearchManager.loadApps()
                 }
                 _allApps.value = apps
             } catch (e: Exception) {
                 e.printStackTrace()
                 _allApps.value = emptyList()
-            } finally {
+            }*/ finally {
                 _isLoading.value = false
             }
         }
