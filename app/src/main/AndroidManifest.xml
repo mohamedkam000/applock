@@ -15,7 +15,6 @@
         android:name=".AppLockApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="App Lock"
-        android:persistent="true"
         android:theme="@style/Theme.AppLock">
 
         <activity
@@ -34,17 +33,6 @@
             android:exported="false"
             android:theme="@android:style/Theme.Material.NoActionBar.TranslucentDecor" />
 
-        <activity
-            android:name=".features.admin.AdminDisableActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AppLock" />
-
-        <service
-            android:name=".services.ShizukuAppLockService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="specialUse" />
-
         <service
             android:name=".services.ExperimentalAppLockService"
             android:enabled="true"
@@ -54,16 +42,6 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="app_lock" />
         </service>
-
-        <receiver
-            android:name=".core.broadcast.DeviceAdmin"
-            android:description="@string/device_admin_description"
-            android:exported="false"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-            </intent-filter>
-        </receiver>
 
         <receiver
             android:name=".services.BootReceiver"
